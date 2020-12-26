@@ -1,0 +1,6 @@
+main: it.fireentity.library.LibraryPlugin
+name: FireLib
+version: 1.0-SNAPSHOT
+authors: [Fireentity]
+depend: [DataCore, ProtocolLib]
+commands:
