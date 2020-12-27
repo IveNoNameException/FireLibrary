@@ -1,5 +1,6 @@
 package it.fireentity.library.player;
 
+import it.fireentity.library.events.EventManager;
 import it.fireentity.library.events.GuiOpenEvent;
 import it.fireentity.library.inventories.GuiPage;
 import it.fireentity.library.inventories.Inventory;
@@ -8,13 +9,16 @@ import it.fireentity.library.inventories.Item;
 import it.fireentity.library.nms.packets.PacketPlayOutCloseWindow_v1_12_R1;
 import it.fireentity.library.nms.packets.PacketPlayOutWindowItems_v1_12_R1;
 import it.fireentity.library.nms.packets.PacketPlayOutOpenWindow_v1_12_R1;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.TreeMap;
 
+@RequiredArgsConstructor
 public class Player_v1_12_R1 extends CustomPlayer {
+    private final EventManager eventManager;
 
     public void sendInventoryContent(Inventory inventory) {
         TreeMap<Integer, Item> items = inventory.getItems(getPlayer());
@@ -58,7 +62,7 @@ public class Player_v1_12_R1 extends CustomPlayer {
 
         sendInventoryContent(guiPage.getInventory());
 
-        Bukkit.getPluginManager().callEvent(new GuiOpenEvent(this, guiPage));
+        eventManager.callEvent(new GuiOpenEvent(this, guiPage));
     }
 
     @Override

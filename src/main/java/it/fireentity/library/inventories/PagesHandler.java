@@ -19,12 +19,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public class PagesHandler implements EventListener {
+public class PagesHandler implements Listener{
     private final GenericCache<Player, GuiPage> openedInventories = new GenericCache<>();
     private final Cache<String, GuiPage> pages = new Cache<>();
 
-    public PagesHandler(AbstractPlugin abstractPlugin) {
-        Bukkit.getPluginManager().registerEvents(this, abstractPlugin);
+    public PagesHandler(AbstractPlugin plugin) {
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.getEventManager().registerListener(GuiClickEvent.class, this::onGuiClickEvent);
+        plugin.getEventManager().registerListener(GuiOpenEvent.class, this::onGuiOpenEvent);
+        plugin.getEventManager().registerListener(GuiCloseEvent.class, this::onGuiCloseEvent);
     }
 
     public int totalPages() {
@@ -52,38 +55,21 @@ public class PagesHandler implements EventListener {
         openedInventories.removeValue(event.getPlayer());
     }
 
-    @Override
-    public List<Class<? extends Event>> getListeningEvent() {
-        List<Class<? extends Event>> classes = new ArrayList<>();
-        classes.add(GuiClickEvent.class);
-        classes.add(GuiCloseEvent.class);
-        classes.add(GuiOpenEvent.class);
-        return classes;
+    public void onGuiClickEvent(GuiClickEvent guiClickEvent) {
+        if (!openedInventories.getValue(guiClickEvent.getPlayer().getPlayer()).isPresent()) {
+            return;
+        }
+        if (this.getPages().contains(guiClickEvent.getGuiPage())) {
+            guiClickEvent.getGuiPage().getInventory().onPlayerClick(guiClickEvent);
+        }
     }
 
-    @Override
-    public void onEvent(Event event) {
-        if(event instanceof GuiClickEvent) {
-            GuiClickEvent guiClickEvent = ((GuiClickEvent) event);
-            if (!openedInventories.getValue(guiClickEvent.getPlayer().getPlayer()).isPresent()) {
-                return;
-            }
-            if (this.getPages().contains(guiClickEvent.getGuiPage())) {
-                guiClickEvent.getGuiPage().getInventory().onPlayerClick(guiClickEvent);
-            }
-            return;
-        }
+    public void onGuiOpenEvent(GuiOpenEvent guiOpenEvent) {
+        openedInventories.addValue(guiOpenEvent.getPlayer().getPlayer(), guiOpenEvent.getGuiPage());
+    }
 
-        if(event instanceof GuiCloseEvent) {
-            GuiCloseEvent guiCloseEvent = (GuiCloseEvent) event;
-            openedInventories.removeValue(guiCloseEvent.getPlayer().getPlayer());
-            guiCloseEvent.getPlayer().closeInventory();
-            return;
-        }
-
-        if(event instanceof GuiOpenEvent) {
-            GuiOpenEvent guiOpenEvent = (GuiOpenEvent) event;
-            openedInventories.addValue(guiOpenEvent.getPlayer().getPlayer(), guiOpenEvent.getGuiPage());
-        }
+    public void onGuiCloseEvent(GuiCloseEvent guiCloseEvent) {
+        openedInventories.removeValue(guiCloseEvent.getPlayer().getPlayer());
+        guiCloseEvent.getPlayer().closeInventory();
     }
 }

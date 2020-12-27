@@ -31,39 +31,37 @@ public abstract class AbstractPlugin extends JavaPlugin {
     private final Cache<String, PagesGroup> pages = new Cache<>();
     private ClickManager clickManager;
     private CommandNode mainNode;
-    private PlayerCache players;
     private Cache<String, PluginFile> pluginFileCache;
     private Cache<String, Command> commandsCache;
-    private PageTexture pageTexture;
     private PagesHandler pagesHandler;
     private GuiClickListener guiClickListener;
     private GuiCloseListener guiCloseListener;
-    private ChangePageCommand changePageCommand;
     private Locales locales;
     private EventManager eventManager;
+    private PageTexture pageTexture;
 
     @Override
     public void onEnable() {
+        onStart();
+        initializeLocales();
+        eventManager = new EventManager();
+        pageTexture = initializePageTexture();
         pagesHandler = new PagesHandler(this);
-        players = new PlayerCache(this);
         pluginFileCache = new Cache<>();
         commandsCache = new Cache<>();
-        eventManager = new EventManager();
         CustomPlayer.setPagesHandler(pagesHandler);
 
         for (PluginFile pluginFile : initializeConfigs()) {
             pluginFileCache.addValue(pluginFile);
         }
 
-        initializeLocales();
         initializeConfigs();
         initializeGuiListener();
-        mainNode = initializeMainNode();
-        getCommand(mainNode.getKey()).setExecutor(mainNode);
-        initializePageContainer();
-        changePageCommand = new ChangePageCommand(this, pageTexture);
+        mainNode = initializeMainNode().orElse(null);
+        if(mainNode !=null) {
+            getCommand(mainNode.getKey()).setExecutor(mainNode);
+        }
         commandsCache.addValue(new ReloadCommand(this));
-        commandsCache.addValue(changePageCommand);
         for (Command command : initializeCommands()) {
             commandsCache.addValue(command);
         }
@@ -101,14 +99,14 @@ public abstract class AbstractPlugin extends JavaPlugin {
         File locales = new File(this.getDataFolder(), "locales.json");
         File missingLocales = new File(this.getDataFolder(), "missingLocales.json");
         this.locales = new Locales(this, locales, missingLocales);
-        for(Message msg : internalInitializeMessageList()) {
+        for (Message msg : internalInitializeMessageList()) {
             //Check if the message exists
             Optional<Message> message = this.locales.getMessage(msg.getKey());
 
             //Check if the passed message as parameters
             if (message.isPresent() && !msg.getArguments().isEmpty()) {
                 message.get().addArguments(msg.getArguments());
-            } else if(!message.isPresent()) {
+            } else if (!message.isPresent()) {
                 this.locales.addMessage(msg);
             }
         }
@@ -120,40 +118,42 @@ public abstract class AbstractPlugin extends JavaPlugin {
             //Check if the passed message as parameters
             if (message.isPresent() && !msg.getArguments().isEmpty()) {
                 message.get().addArguments(msg.getArguments());
-            } else if(!message.isPresent()) {
+            } else if (!message.isPresent()) {
                 this.locales.addMessage(msg);
             }
         }
     }
 
-    private void initializePageContainer() {
+    private PageTexture initializePageTexture() {
+
         Optional<Integer> maxPageSize = locales.getInteger(Config.CHAT_PAGINATION_MAX_PAGE_SIZE.getPath());
         String nextButton = locales.getString(Config.CHAT_PAGINATION_NEXT_BUTTON.getPath());
         String backButton = locales.getString(Config.CHAT_PAGINATION_BACK_BUTTON.getPath());
-        String endMessage = locales.getString(Config.CHAT_PAGINATION_END_MESSAGE.getPath());
+        String endMessage = locales.getString(Config.CHAT_PAGINATION_START_MESSAGE.getPath());
         String startMessage = locales.getString(Config.CHAT_PAGINATION_START_MESSAGE.getPath());
         String noLineFound = locales.getString(Config.CHAT_PAGINATION_NO_LINE_FOUND.getPath());
         String onePageStartMessage = locales.getString(Config.ONE_PAGE_START_MESSAGE.getPath());
         String onePageEndMessage = locales.getString(Config.ONE_PAGE_END_MESSAGE.getPath());
 
-        if (!maxPageSize.isPresent()) {
-            return;
-        }
+        return maxPageSize
+                .map(integer -> new PageTexture(nextButton, backButton, endMessage, startMessage, noLineFound, integer, onePageStartMessage, onePageEndMessage))
+                .orElse(null);
 
-        pageTexture = new PageTexture(nextButton, backButton, endMessage, startMessage, noLineFound, maxPageSize.get(), onePageStartMessage, onePageEndMessage);
-    }
-
-    public Optional<ChangePageCommand> getChangePageCommand() {
-        return Optional.ofNullable(changePageCommand);
     }
 
     private List<Message> internalInitializeMessageList() {
         List<Message> pathList = new ArrayList<>();
-        for(Config msg : Config.class.getEnumConstants()) {
+        for (Config msg : Config.class.getEnumConstants()) {
             pathList.add(msg.getMessage());
         }
         return pathList;
     }
+
+    public APIFireLibrary getAPIFireLibrary() {
+        return APIFireLibrary.getApiFireLibrary();
+    }
+
+    protected abstract void onStart();
 
     protected abstract List<Message> initializeMessageList();
 
@@ -167,5 +167,5 @@ public abstract class AbstractPlugin extends JavaPlugin {
 
     protected abstract void initializeListeners();
 
-    protected abstract CommandNode initializeMainNode();
+    protected abstract Optional<CommandNode> initializeMainNode();
 }

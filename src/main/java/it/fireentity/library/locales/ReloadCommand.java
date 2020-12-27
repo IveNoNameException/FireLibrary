@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ReloadCommand extends Command {
     public ReloadCommand(AbstractPlugin abstractPlugin) {
-        super(abstractPlugin, abstractPlugin.getPageTexture(),"reload", true, abstractPlugin.getMainNode());
+        super(abstractPlugin, abstractPlugin.getAPIFireLibrary().getPageTexture(),"reload", true, abstractPlugin.getMainNode());
     }
 
     @Override

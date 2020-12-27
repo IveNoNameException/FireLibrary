@@ -49,7 +49,7 @@ public abstract class Command implements Cacheable<String> {
         }
         if (pageTexture != null) {
             pagesGroup = new PagesGroup(this.getCommandNode().getKey(), pageTexture);
-            abstractPlugin.getChangePageCommand().ifPresent(command -> command.addPagesGroup(pagesGroup));
+            abstractPlugin.getAPIFireLibrary().getChangePageCommand().ifPresent(command -> command.addPagesGroup(pagesGroup));
         } else {
             pagesGroup = null;
         }
@@ -106,16 +106,16 @@ public abstract class Command implements Cacheable<String> {
             if (!argument.isEvaluated() && !argument.isOptional()) {
                 abstractPlugin.getLocales().sendMessage(Config.INVALID_ARGUMENT.getPath(),sender, argument.getArgumentName());
                 commandRow.resetAll();
-                if (abstractPlugin.getChangePageCommand().isPresent()) {
-                    Optional<PagesGroup> pagesGroup = abstractPlugin.getChangePageCommand().get().getPagesGroup(argument.getArgumentName());
+                if (abstractPlugin.getAPIFireLibrary().getChangePageCommand().isPresent()) {
+                    Optional<PagesGroup> pagesGroup = abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().getPagesGroup(argument.getArgumentName());
                     if (pagesGroup.isPresent()) {
                         pagesGroup.get().setLines(new ArrayList<>(argument.getPossibleValues()));
-                        abstractPlugin.getChangePageCommand().get().sendPage(sender, pagesGroup.get(), 1);
+                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().sendPage(sender, pagesGroup.get(), 1);
                     } else {
-                        PagesGroup pages = new PagesGroup(argument.getArgumentName(), abstractPlugin.getPageTexture());
-                        abstractPlugin.getChangePageCommand().get().addPagesGroup(pages);
+                        PagesGroup pages = new PagesGroup(argument.getArgumentName(), abstractPlugin.getAPIFireLibrary().getPageTexture());
+                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().addPagesGroup(pages);
                         pages.setLines(new ArrayList<>(argument.getPossibleValues()));
-                        abstractPlugin.getChangePageCommand().get().sendPage(sender, pages, 1);
+                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().sendPage(sender, pages, 1);
                     }
                 }
                 return;

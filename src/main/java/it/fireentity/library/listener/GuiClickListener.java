@@ -1,6 +1,7 @@
 package it.fireentity.library.listener;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import it.fireentity.library.AbstractPlugin;
 import it.fireentity.library.events.GuiClickEvent;
@@ -54,7 +55,7 @@ public class GuiClickListener extends GuiListener {
             return;
         }
 
-        Optional<CustomPlayer> player = getPlugin().getPlayers().getPlayer(event.getPlayer().getName());
+        Optional<CustomPlayer> player = getPlugin().getAPIFireLibrary().getPlayers().getPlayer(event.getPlayer().getName());
         if (!player.isPresent()) {
             return;
         }
@@ -63,7 +64,7 @@ public class GuiClickListener extends GuiListener {
             player.get().getPlayer().sendMessage(clickManager.getErrorDelayClick());
             clickEvent.setCancelled(true);
         } else {
-            Bukkit.getScheduler().runTask(getPlugin(), () -> Bukkit.getPluginManager().callEvent(clickEvent));
+            getPlugin().getAPIFireLibrary().getEventManager().callEvent(clickEvent);
             clickManager.addPlayer(event.getPlayer());
         }
         event.setCancelled(true);

@@ -27,7 +27,7 @@ public class GuiCloseListener extends GuiListener {
         if (!guiPage.isPresent()) {
             return;
         }
-        Optional<CustomPlayer> player = plugin.getPlayers().getPlayer(event.getPlayer().getName());
-        player.ifPresent(value -> Bukkit.getPluginManager().callEvent(new GuiCloseEvent(value, guiPage.get())));
+        Optional<CustomPlayer> player = plugin.getAPIFireLibrary().getPlayers().getPlayer(event.getPlayer().getName());
+        player.ifPresent(value -> getPlugin().getEventManager().callEvent(new GuiCloseEvent(value, guiPage.get())));
     }
 }

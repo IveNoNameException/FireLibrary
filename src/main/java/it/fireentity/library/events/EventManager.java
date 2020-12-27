@@ -2,25 +2,30 @@ package it.fireentity.library.events;
 
 import it.fireentity.library.interfaces.Event;
 import it.fireentity.library.interfaces.EventListener;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class EventManager {
 
-    private final Map<Class<? extends Event>, List<EventListener>> listenerMap = new HashMap<>();
+    @RequiredArgsConstructor
+    @Getter
+    private static class EventListeners<T extends Event> {
+        private final List<Consumer<T>> listeners;
+    }
 
-    public <T extends Event> void registerListener(EventListener listener) {
-        for(Class<? extends Event> event : listener.getListeningEvent()) {
-            //Check if the list of listeners is already initialized
-            List<EventListener> listeners = this.listenerMap.get(event);
+    private final Map<Class<? extends Event>, EventListeners<? extends Event>> listenerMap = new HashMap<>();
 
-            if (listeners == null) {
-                listeners = new ArrayList<>();
-                listenerMap.put(event, listeners);
-            }
-
-            listeners.add(listener);
+    public <T extends Event> void registerListener(Class<T> clazz, Consumer<T> function) {
+        //Check if the event listeners
+        if(listenerMap.get(clazz) == null) {
+            listenerMap.put(clazz,new EventListeners<>(new ArrayList<>()));
         }
+
+        EventListeners<T> listeners = (EventListeners<T>) listenerMap.get(clazz);
+        listeners.getListeners().add(function);
     }
 
     public <T extends Event> void callEvent(T event) {

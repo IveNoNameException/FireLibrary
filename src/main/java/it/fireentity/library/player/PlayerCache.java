@@ -20,7 +20,7 @@ public class PlayerCache implements Listener {
 
     public PlayerCache(AbstractPlugin plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        player = new VersionBasedFactory<CustomPlayer>().register(ServerVersion.v1_12_R1, Player_v1_12_R1::new);
+        player = new VersionBasedFactory<CustomPlayer>().register(ServerVersion.v1_12_R1, () -> new Player_v1_12_R1(plugin.getEventManager()));
         version = plugin.getServer();
     }
 
