@@ -1,5 +1,5 @@
 main: it.fireentity.library.APIFireLibrary
-name: FireLib
+name: FireLibrary
 version: 1.0-SNAPSHOT
 authors: [Fireentity]
 depend: [DataCore, ProtocolLib]

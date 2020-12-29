@@ -1,10 +1,8 @@
 package it.fireentity.library;
 
-import it.fireentity.library.chatpaging.PageTexture;
 import it.fireentity.library.chatpaging.command.ChangePageCommand;
 import it.fireentity.library.command.argument.Command;
 import it.fireentity.library.command.nodes.CommandNode;
-import it.fireentity.library.enumerations.Config;
 import it.fireentity.library.locales.Message;
 import it.fireentity.library.player.PlayerCache;
 import it.fireentity.library.utils.PluginFile;
@@ -20,10 +18,14 @@ public class APIFireLibrary extends AbstractPlugin {
     private PlayerCache players;
     private ChangePageCommand changePageCommand;
 
+    {
+        apiFireLibrary = this;
+    }
+
 
     @Override
     protected void onStart() {
-        apiFireLibrary = this;
+
     }
 
     @Override

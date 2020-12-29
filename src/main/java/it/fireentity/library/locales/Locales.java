@@ -108,43 +108,14 @@ public class Locales {
     public String getString(String path, String... args) {
         Optional<Message> message = messageCache.getValue(path);
         if (!message.isPresent()) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                writeIntoMissing(path);
-            });
             return "§c{Missing locale at §6" + path + "§c}§f";
         }
         Optional<String> evaluatedMessage = message.get().evaluate(args);
-        if (!evaluatedMessage.isPresent()) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                writeIntoMissing(path, message.get().getArguments());
-                writeIntoMissing(path);
-            });
-            return "§c{Missing locale at §6" + path + "§c}§f";
-        } else {
-            return evaluatedMessage.get().replace("&", "§");
-        }
+        return evaluatedMessage.map(s -> s.replace("&", "§")).orElseGet(() -> "§c{Missing locale at §6" + path + "§c}§f");
     }
 
-    public String getStringWithConsoleAdvice(String path, String... args) {
-        Optional<Message> message = messageCache.getValue(path);
-        if (!message.isPresent()) {
-            System.out.println("§c{Missing locale at §6" + path + "§c}§f");
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                writeIntoMissing(path);
-            });
-            return "§c{Missing locale at §6" + path + "§c}§f";
-        }
-        Optional<String> evaluatedMessage = message.get().evaluate(args);
-        if (!evaluatedMessage.isPresent()) {
-            System.out.println("§c{Missing locale at §6" + path + "§c}§f");
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                writeIntoMissing(path, message.get().getArguments());
-                writeIntoMissing(path);
-            });
-            return "§c{Missing locale at §6" + path + "§c}§f";
-        } else {
-            return evaluatedMessage.get().replace("&", "§");
-        }
+    public boolean hasPath(String path) {
+        return messageCache.getValue(path).isPresent();
     }
 
     public Optional<Double> getDouble(String path) {

@@ -27,7 +27,7 @@ public class PageTexture implements Cloneable {
     }
 
     @Override
-    public PageTexture clone() throws CloneNotSupportedException {
-        return (PageTexture) super.clone();
+    public PageTexture clone() {
+        return new PageTexture(nextButton,backButton,endMessage,startMessage,noLineFound,maxPageSize,onePageStartMessage,onePageEndMessage);
     }
 }

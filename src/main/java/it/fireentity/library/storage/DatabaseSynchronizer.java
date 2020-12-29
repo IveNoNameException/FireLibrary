@@ -2,7 +2,6 @@ package it.fireentity.library.storage;
 
 import it.fireentity.library.AbstractPlugin;
 import it.fireentity.library.interfaces.Cacheable;
-import it.fireentity.library.interfaces.LoadableDatabaseUtility;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -13,10 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class Command implements Cacheable<String> {
     @Getter
@@ -55,8 +52,23 @@ public abstract class Command implements Cacheable<String> {
         }
     }
 
-    public Message addMessage(String relativePath) {
-        return abstractPlugin.getLocales().addMessage(relativePath);
+    public void addMessage(String path, String... args) {
+
+        Optional<Message> message = abstractPlugin.getLocales().getMessage(path);
+        if (args == null) {
+            //Check if the message already exists
+            //If the message exists check is the text is set
+            if (message.isPresent() && !message.get().getMessage().isPresent()) {
+                System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+                abstractPlugin.getLocales().writeIntoMissing(path, message.get().getArguments());
+            } else if (!message.isPresent()) {
+                System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+                abstractPlugin.getLocales().writeIntoMissing(path);
+            }
+        } else if (!message.isPresent()) {
+            System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+            abstractPlugin.getLocales().writeIntoMissing(path, Arrays.asList(args));
+        }
     }
 
     public abstract void execute(CommandSender sender, List<String> args, CommandRow commandRow);
@@ -89,7 +101,7 @@ public abstract class Command implements Cacheable<String> {
 
     public void evaluate(CommandSender sender, List<String> args) {
         if (!sender.hasPermission(commandNode.getPermission())) {
-            abstractPlugin.getLocales().sendMessage(Config.INSUFFICIENT_PERMISSIONS.getPath(),sender);
+            abstractPlugin.getLocales().sendMessage(Config.INSUFFICIENT_PERMISSIONS.getPath(), sender);
             return;
         }
 
@@ -104,7 +116,7 @@ public abstract class Command implements Cacheable<String> {
 
         for (AbstractArgument argument : arguments.values()) {
             if (!argument.isEvaluated() && !argument.isOptional()) {
-                abstractPlugin.getLocales().sendMessage(Config.INVALID_ARGUMENT.getPath(),sender, argument.getArgumentName());
+                abstractPlugin.getLocales().sendMessage(Config.INVALID_ARGUMENT.getPath(), sender, argument.getArgumentName());
                 commandRow.resetAll();
                 if (abstractPlugin.getAPIFireLibrary().getChangePageCommand().isPresent()) {
                     Optional<PagesGroup> pagesGroup = abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().getPagesGroup(argument.getArgumentName());

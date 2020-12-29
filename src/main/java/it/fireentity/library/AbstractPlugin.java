@@ -42,7 +42,6 @@ public abstract class AbstractPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        onStart();
         initializeLocales();
         eventManager = new EventManager();
         pageTexture = initializePageTexture();
@@ -50,31 +49,30 @@ public abstract class AbstractPlugin extends JavaPlugin {
         pluginFileCache = new Cache<>();
         commandsCache = new Cache<>();
         CustomPlayer.setPagesHandler(pagesHandler);
-
         for (PluginFile pluginFile : initializeConfigs()) {
             pluginFileCache.addValue(pluginFile);
         }
-
-        initializeConfigs();
         initializeGuiListener();
         mainNode = initializeMainNode().orElse(null);
         if(mainNode !=null) {
             getCommand(mainNode.getKey()).setExecutor(mainNode);
         }
+
+        for (Message msg : this.locales.getMessages()) {
+            if (!msg.getMessage().isPresent()) {
+                System.out.println(this.getName() + ": §c{Missing locale at §6" + msg.getKey() + "§c}§f");
+                this.locales.writeIntoMissing(msg.getKey(), msg.getArguments());
+            }
+        }
         commandsCache.addValue(new ReloadCommand(this));
         for (Command command : initializeCommands()) {
             commandsCache.addValue(command);
-        }
-        for (Message msg : this.locales.getMessages()) {
-            if (!msg.getMessage().isPresent()) {
-                System.out.println("§c{Missing locale at §6" + msg.getKey() + "§c}§f");
-                this.locales.writeIntoMissing(msg.getKey(), msg.getArguments());
-            }
         }
 
         initializeDatabaseUtility();
         initializeCaches();
         initializeListeners();
+        onStart();
     }
 
     public void reloadLocale() {
@@ -86,7 +84,7 @@ public abstract class AbstractPlugin extends JavaPlugin {
     public void initializeGuiListener() {
         try {
             int delay = Integer.parseInt(locales.getString(Config.CLICK_GUI_DELAY.getPath()));
-            clickManager = new ClickManager(this, delay, getLocales().getStringWithConsoleAdvice("click_delay_error"));
+            clickManager = new ClickManager(this, delay, getLocales().getString("click_delay_error"));
             guiClickListener = new GuiClickListener(this, pagesHandler, clickManager);
             guiCloseListener = new GuiCloseListener(this, pagesHandler);
 
