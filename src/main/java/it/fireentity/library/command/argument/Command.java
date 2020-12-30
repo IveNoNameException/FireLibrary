@@ -11,6 +11,7 @@ import it.fireentity.library.interfaces.Cacheable;
 import it.fireentity.library.locales.Message;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.*;
@@ -46,10 +47,11 @@ public abstract class Command implements Cacheable<String> {
         }
         if (pageTexture != null) {
             pagesGroup = new PagesGroup(this.getCommandNode().getKey(), pageTexture);
-            abstractPlugin.getAPIFireLibrary().getChangePageCommand().ifPresent(command -> command.addPagesGroup(pagesGroup));
+            abstractPlugin.getAPIFireLibrary().getChangePageCommand().addPagesGroup(pagesGroup);
         } else {
             pagesGroup = null;
         }
+        this.abstractPlugin.getCommandsCache().addValue(this);
     }
 
     public void addMessage(String path, String... args) {
@@ -59,14 +61,14 @@ public abstract class Command implements Cacheable<String> {
             //Check if the message already exists
             //If the message exists check is the text is set
             if (message.isPresent() && !message.get().getMessage().isPresent()) {
-                System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+                getPlugin().getLogger().severe(abstractPlugin.getName() + ": " + ChatColor.RED + "{Missing locale at " + ChatColor.GOLD + path + ChatColor.RED + "}" + ChatColor.RESET);
                 abstractPlugin.getLocales().writeIntoMissing(path, message.get().getArguments());
             } else if (!message.isPresent()) {
-                System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+                getPlugin().getLogger().severe(abstractPlugin.getName() + ": " + ChatColor.RED + "{Missing locale at " + ChatColor.GOLD + path + ChatColor.RED + "}" + ChatColor.RESET);
                 abstractPlugin.getLocales().writeIntoMissing(path);
             }
         } else if (!message.isPresent()) {
-            System.out.println(abstractPlugin.getName() + ": §c{Missing locale at §6" + path + "§c}§f");
+            getPlugin().getLogger().severe(abstractPlugin.getName() + ": " + ChatColor.RED + "{Missing locale at " + ChatColor.GOLD + path + ChatColor.RED + "}" + ChatColor.RESET);
             abstractPlugin.getLocales().writeIntoMissing(path, Arrays.asList(args));
         }
     }
@@ -118,17 +120,18 @@ public abstract class Command implements Cacheable<String> {
             if (!argument.isEvaluated() && !argument.isOptional()) {
                 abstractPlugin.getLocales().sendMessage(Config.INVALID_ARGUMENT.getPath(), sender, argument.getArgumentName());
                 commandRow.resetAll();
-                if (abstractPlugin.getAPIFireLibrary().getChangePageCommand().isPresent()) {
-                    Optional<PagesGroup> pagesGroup = abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().getPagesGroup(argument.getArgumentName());
-                    if (pagesGroup.isPresent()) {
-                        pagesGroup.get().setLines(new ArrayList<>(argument.getPossibleValues()));
-                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().sendPage(sender, pagesGroup.get(), 1);
-                    } else {
-                        PagesGroup pages = new PagesGroup(argument.getArgumentName(), abstractPlugin.getAPIFireLibrary().getPageTexture());
-                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().addPagesGroup(pages);
-                        pages.setLines(new ArrayList<>(argument.getPossibleValues()));
-                        abstractPlugin.getAPIFireLibrary().getChangePageCommand().get().sendPage(sender, pages, 1);
+                Optional<PagesGroup> pagesGroup = abstractPlugin.getAPIFireLibrary().getChangePageCommand().getPagesGroup(argument.getArgumentName());
+                if (pagesGroup.isPresent()) {
+                    pagesGroup.get().setLines(new ArrayList<>(argument.getPossibleValues()));
+                    abstractPlugin.getAPIFireLibrary().getChangePageCommand().sendPage(sender, pagesGroup.get(), 1);
+                } else {
+                    PagesGroup pages = abstractPlugin.getAPIFireLibrary().getPageTexture().map(page -> new PagesGroup(argument.getArgumentName(), page)).orElse(null);
+                    if (pages == null) {
+                        return;
                     }
+                    abstractPlugin.getAPIFireLibrary().getChangePageCommand().addPagesGroup(pages);
+                    pages.setLines(new ArrayList<>(argument.getPossibleValues()));
+                    abstractPlugin.getAPIFireLibrary().getChangePageCommand().sendPage(sender, pages, 1);
                 }
                 return;
             }

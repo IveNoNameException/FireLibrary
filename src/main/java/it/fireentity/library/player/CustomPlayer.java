@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import java.util.Optional;
 
 public abstract class CustomPlayer implements Cacheable<String> {
-    @Getter @Setter private static PagesHandler pagesHandler;
+    @Getter @Setter private PagesHandler pagesHandler;
     @Getter @Setter(value = AccessLevel.PROTECTED) private Player player;
     @Getter @Setter private int windowID;
     @Setter(value = AccessLevel.PROTECTED) private InventoryView inventoryView;

@@ -24,48 +24,16 @@ public class APIFireLibrary extends AbstractPlugin {
 
 
     @Override
-    protected void onStart() {
-
+    public void onStart() {
+        getPageTexture().ifPresent(pageTexture -> new ChangePageCommand(this, pageTexture));
     }
 
     @Override
-    protected List<Message> initializeMessageList() {
-        return new ArrayList<>();
+    public CommandNode initializeMainCommandNode() {
+        return new CommandNode(this, "FireLibAPI", false);
     }
 
-    @Override
-    protected List<Command> initializeCommands() {
-        List<Command> commands = new ArrayList<>();
-        commands.add(changePageCommand = new ChangePageCommand(this,this.getPageTexture()));
-        return commands;
-    }
-
-    @Override
-    protected List<PluginFile> initializeConfigs() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    protected void initializeCaches() {
-        this.players = new PlayerCache(this);
-    }
-
-    @Override
-    protected void initializeDatabaseUtility() {
-
-    }
-
-    @Override
-    protected void initializeListeners() {
-
-    }
-
-    @Override
-    protected Optional<CommandNode> initializeMainNode() {
-        return Optional.empty();
-    }
-
-    public Optional<ChangePageCommand> getChangePageCommand() {
-        return Optional.ofNullable(changePageCommand);
+    public ChangePageCommand getChangePageCommand() {
+        return changePageCommand;
     }
 }
