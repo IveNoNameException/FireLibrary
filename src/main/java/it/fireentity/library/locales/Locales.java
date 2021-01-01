@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Locales {
     private final Cache<String, Message> messageCache = new Cache<>();
@@ -53,7 +50,7 @@ public class Locales {
 
         //Clear the missings file
         try {
-            Files.write(missingLocales.toPath(),"".getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(missingLocales.toPath(),"".getBytes(StandardCharsets.UTF_8) ,StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,14 +135,44 @@ public class Locales {
         sender.sendMessage(getString(path, args));
     }
 
-    public Message addMessage(String path) {
-        Message message = messageCache.getValue(path).orElse(new Message(path));
-        messageCache.addValue(message);
-        return message;
+    public Message addMessage(String path, String ... args) {
+        //Check if the message exists
+        Optional<Message> message = getMessage(path);
+        List<String> arguments;
+        if(args != null) {
+            arguments = Arrays.asList(args);
+        } else {
+            arguments = new ArrayList<>();
+        }
+
+        //Check if the passed message as parameters
+        //If the message as no text and there are arguments to add then
+        if (message.isPresent() && message.get().getArguments().isEmpty()) {
+            message.get().addArguments(arguments);
+        } else if (!message.isPresent()) {
+            message = Optional.of(new Message(path));
+            messageCache.addValue(message.get());
+        }
+
+        return message.get();
     }
 
-    public Message addMessage(Message message) {
-        messageCache.addValue(message);
+    public Message addMessage(Message message, String ... args) {
+        Optional<Message> messageOptional = getMessage(message.getKey());
+        List<String> arguments;
+        if(args != null) {
+            arguments = Arrays.asList(args);
+        } else {
+            arguments = new ArrayList<>();
+        }
+
+        if(messageOptional.isPresent() && messageOptional.get().getArguments().isEmpty()) {
+            messageOptional.get().addArguments(arguments);
+        } else if(!messageOptional.isPresent()) {
+            message.addArguments(arguments);
+            messageCache.addValue(message);
+        }
+
         return message;
     }
 

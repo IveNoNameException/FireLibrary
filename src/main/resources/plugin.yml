@@ -3,5 +3,6 @@ name: FireLibrary
 version: 1.0-SNAPSHOT
 authors: [Fireentity]
 depend: [DataCore, ProtocolLib]
-command:
-  ciao: "ciao"
+commands:
+  firelibapi:
+   description: "ciao"

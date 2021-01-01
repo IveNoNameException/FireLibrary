@@ -12,6 +12,6 @@ repositories {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    implementation files("C:\\Users\\pc\\IdeaProjects\\FORMATO JAR\\spigot-1.12.2.jar")
-    compileOnly files("C:\\Users\\pc\\IdeaProjects\\FORMATO JAR\\ProtocolLib.jar")
+    implementation files("\\\\DESKTOP-QSEUPLK\\Share\\Server\\spigot.jar")
+    compileOnly files("\\\\DESKTOP-QSEUPLK\\Share\\Server\\plugins\\ProtocolLib.jar")
 }

@@ -1,18 +1,16 @@
 package it.fireentity.library.listener;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import it.fireentity.library.AbstractPlugin;
 import it.fireentity.library.events.GuiClickEvent;
 import it.fireentity.library.interfaces.packets.IPacketPlayInWindowClick;
+import it.fireentity.library.inventories.GuiPage;
 import it.fireentity.library.inventories.PagesHandler;
 import it.fireentity.library.nms.ServerVersion;
 import it.fireentity.library.nms.VersionBasedFactory;
 import it.fireentity.library.nms.packets.PacketPlayInWindowClick_v1_12_R1;
 import it.fireentity.library.player.CustomPlayer;
-import it.fireentity.library.inventories.GuiPage;
-import org.bukkit.Bukkit;
 
 import java.util.Optional;
 

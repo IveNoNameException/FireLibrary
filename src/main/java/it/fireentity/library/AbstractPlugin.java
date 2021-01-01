@@ -37,7 +37,7 @@ public abstract class AbstractPlugin extends JavaPlugin {
     private PageTexture pageTexture;
 
     public Optional<PageTexture> getPageTexture() {
-        return Optional.empty();
+        return Optional.ofNullable(pageTexture);
     }
 
     @Override
@@ -49,7 +49,8 @@ public abstract class AbstractPlugin extends JavaPlugin {
         clickManager = initializeClickManager();
         guiClickListener = new GuiClickListener(this, pagesHandler, clickManager);
         guiCloseListener = new GuiCloseListener(this, pagesHandler);
-        getCommand((mainNode = initializeMainCommandNode()).getKey()).setExecutor(mainNode);
+        mainNode = initializeMainCommandNode();
+        getCommand(mainNode.getKey()).setExecutor(mainNode);
         new ReloadCommand(this);
         initializePageTexture().ifPresent(page -> this.pageTexture = page);
         onStart();
@@ -89,19 +90,7 @@ public abstract class AbstractPlugin extends JavaPlugin {
         return pathList;
     }
 
-    private Optional<PageTexture> initializePageTexture() {
-
-        Optional<Integer> maxPageSize = locales.getInteger(Config.CHAT_PAGINATION_MAX_PAGE_SIZE.getPath());
-        String nextButton = locales.getString(Config.CHAT_PAGINATION_NEXT_BUTTON.getPath());
-        String backButton = locales.getString(Config.CHAT_PAGINATION_BACK_BUTTON.getPath());
-        String endMessage = locales.getString(Config.CHAT_PAGINATION_START_MESSAGE.getPath());
-        String startMessage = locales.getString(Config.CHAT_PAGINATION_START_MESSAGE.getPath());
-        String noLineFound = locales.getString(Config.CHAT_PAGINATION_NO_LINE_FOUND.getPath());
-        String onePageStartMessage = locales.getString(Config.ONE_PAGE_START_MESSAGE.getPath());
-        String onePageEndMessage = locales.getString(Config.ONE_PAGE_END_MESSAGE.getPath());
-
-        return maxPageSize.map(integer -> new PageTexture(nextButton, backButton, endMessage, startMessage, noLineFound, integer, onePageStartMessage, onePageEndMessage));
-    }
+    protected abstract Optional<PageTexture> initializePageTexture();
 
     public Locales initializeLocales() {
         File localesFiles = new File(this.getDataFolder(), "locales.json");
@@ -109,13 +98,13 @@ public abstract class AbstractPlugin extends JavaPlugin {
         Locales locales = new Locales(this, localesFiles, missingLocales);
         for (Message msg : internalInitializeMessageList()) {
             //Check if the message exists
-            Optional<Message> message = this.locales.getMessage(msg.getKey());
+            Optional<Message> message = locales.getMessage(msg.getKey());
 
             //Check if the passed message as parameters
             if (message.isPresent() && !msg.getArguments().isEmpty()) {
                 message.get().addArguments(msg.getArguments());
             } else if (!message.isPresent()) {
-                this.locales.addMessage(msg);
+                locales.addMessage(msg);
             }
         }
         return locales;

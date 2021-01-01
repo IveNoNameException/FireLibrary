@@ -47,7 +47,9 @@ public abstract class Command implements Cacheable<String> {
         }
         if (pageTexture != null) {
             pagesGroup = new PagesGroup(this.getCommandNode().getKey(), pageTexture);
-            abstractPlugin.getAPIFireLibrary().getChangePageCommand().addPagesGroup(pagesGroup);
+            if(abstractPlugin.getAPIFireLibrary().getChangePageCommand() != null) {
+                abstractPlugin.getAPIFireLibrary().getChangePageCommand().addPagesGroup(pagesGroup);
+            }
         } else {
             pagesGroup = null;
         }
